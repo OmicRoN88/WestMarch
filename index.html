@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Шестиугольная карта</title>
+<title>Шестиугольная карта (flat-top)</title>
 <style>
   * { box-sizing: border-box; }
 
@@ -30,25 +30,23 @@
   /* ---------- КОНТЕЙНЕР ---------- */
   .hive {
     position: relative;
-    /* Размеры шестиугольника: W — ширина, H — высота (H = W * 1.1547) */
-    --w: 120px;
-    --h: 138.56px;
-    /* Контейнер должен вмещать все 7 фигур:
-       ширина = 2 * W (два шестиугольника в ряд по горизонтали)
-       высота = 2 * H (два по вертикали) */
+    /* Для flat-top: W — ширина (от вершины до вершины), H — высота (от грани до грани).
+       У правильного шестиугольника H = W * sqrt(3) / 2 ≈ W * 0.866 */
+    --w: 138.56px;  /* 120 * 1.1547 */
+    --h: 120px;
+
     width: calc(var(--w) * 2);
     height: calc(var(--h) * 2);
-    /* Убираем overflow, чтобы ничего не обрезалось */
     margin-bottom: 30px;
   }
 
-  /* ---------- БАЗОВЫЙ ШЕСТИУГОЛЬНИК ---------- */
+  /* ---------- БАЗОВЫЙ ШЕСТИУГОЛЬНИК (FLAT-TOP) ---------- */
   .hex {
     position: absolute;
     width: var(--w);
     height: var(--h);
-    /* Правильный шестиугольник с вершиной вверх */
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    /* Flat-top: вершины по бокам, верх/низ — плоские */
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
     border: none;
     cursor: pointer;
     padding: 0;
@@ -75,17 +73,16 @@
     z-index: 0;
   }
 
-  /* Внутренний слой (заливка, чуть темнее) */
+  /* Внутренний слой (заливка) */
   .hex::after {
     content: "";
     position: absolute;
-    inset: 5px; /* Толщина границы */
+    inset: 5px;
     background: #24243a;
     clip-path: inherit;
     z-index: 1;
   }
 
-  /* Текст поверх */
   .hex > span {
     position: relative;
     z-index: 2;
@@ -96,51 +93,45 @@
   .hex:hover::after { background: #2f2f4d; }
   .hex:active { transform: scale(0.97); }
 
-  /* ---------- ПОЗИЦИИ (ТОЧНЫЙ РАСЧЁТ) ---------- */
+  /* ---------- ПОЗИЦИИ ---------- */
   /* 
-     Чтобы грани идеально совпадали, используем следующие смещения:
-     - По горизонтали: 0.5 * W
-     - По вертикали:   0.375 * H
-     
-     Для правильного шестиугольника (H = W * 1.1547):
-     шаг по вертикали = 0.75 * H
-     шаг по горизонтали = 0.5 * W
-     
-     Центр находится в координатах: left = 0.5 * W, top = 0.5 * H
+     Flat-top шестиугольники:
+     - По горизонтали шаг = 0.75 * W
+     - По вертикали шаг = 0.5 * H
   */
 
   .hex-center {
     left: calc(var(--w) * 0.5);
     top: calc(var(--h) * 0.5);
-    z-index: 10; /* Центр поверх остальных */
+    z-index: 10;
   }
 
-  .hex-north {
-    left: calc(var(--w) * 0.5);
-    top: calc(var(--h) * 0.5 - var(--h) * 0.75);
+  .hex-east {
+    left: calc(var(--w) * 0.5 + var(--w) * 0.75);
+    top: calc(var(--h) * 0.5);
   }
-  .hex-south {
-    left: calc(var(--w) * 0.5);
-    top: calc(var(--h) * 0.5 + var(--h) * 0.75);
+  .hex-west {
+    left: calc(var(--w) * 0.5 - var(--w) * 0.75);
+    top: calc(var(--h) * 0.5);
   }
   .hex-north-east {
-    left: calc(var(--w) * 0.5 + var(--w) * 0.5);
-    top: calc(var(--h) * 0.5 - var(--h) * 0.375);
+    left: calc(var(--w) * 0.5 + var(--w) * 0.375);
+    top: calc(var(--h) * 0.5 - var(--h) * 0.5);
   }
   .hex-north-west {
-    left: calc(var(--w) * 0.5 - var(--w) * 0.5);
-    top: calc(var(--h) * 0.5 - var(--h) * 0.375);
+    left: calc(var(--w) * 0.5 - var(--w) * 0.375);
+    top: calc(var(--h) * 0.5 - var(--h) * 0.5);
   }
   .hex-south-east {
-    left: calc(var(--w) * 0.5 + var(--w) * 0.5);
-    top: calc(var(--h) * 0.5 + var(--h) * 0.375);
+    left: calc(var(--w) * 0.5 + var(--w) * 0.375);
+    top: calc(var(--h) * 0.5 + var(--h) * 0.5);
   }
   .hex-south-west {
-    left: calc(var(--w) * 0.5 - var(--w) * 0.5);
-    top: calc(var(--h) * 0.5 + var(--h) * 0.375);
+    left: calc(var(--w) * 0.5 - var(--w) * 0.375);
+    top: calc(var(--h) * 0.5 + var(--h) * 0.5);
   }
 
-  /* ---------- ИСТОРИЯ НАЖАТИЙ (СВЕРХУ ВНИЗ) ---------- */
+  /* ---------- ИСТОРИЯ ---------- */
   .history {
     width: min(420px, 92vw);
     background: #1b1b2b;
@@ -164,7 +155,7 @@
 
   .history-list {
     display: flex;
-    flex-direction: column; /* Сверху вниз */
+    flex-direction: column;
     gap: 8px;
   }
 
@@ -193,12 +184,12 @@
     <button class="hex hex-center" data-label="Центр"><span>Центр</span></button>
 
     <!-- 6 соседей -->
-    <button class="hex hex-north"      data-label="Север"><span>Север</span></button>
+    <button class="hex hex-east"       data-label="Восток"><span>Восток</span></button>
+    <button class="hex hex-west"       data-label="Запад"><span>Запад</span></button>
     <button class="hex hex-north-east" data-label="Северо-восток"><span>Северо-восток</span></button>
-    <button class="hex hex-south-east" data-label="Юго-восток"><span>Юго-восток</span></button>
-    <button class="hex hex-south"      data-label="Юг"><span>Юг</span></button>
-    <button class="hex hex-south-west" data-label="Юго-запад"><span>Юго-запад</span></button>
     <button class="hex hex-north-west" data-label="Северо-запад"><span>Северо-запад</span></button>
+    <button class="hex hex-south-east" data-label="Юго-восток"><span>Юго-восток</span></button>
+    <button class="hex hex-south-west" data-label="Юго-запад"><span>Юго-запад</span></button>
   </div>
 
   <div class="history">
@@ -215,11 +206,7 @@
       const item = document.createElement('div');
       item.className = 'history-item';
       item.textContent = label;
-
-      // Добавляем в конец списка (сверху вниз)
       list.appendChild(item);
-
-      // Автоматическая прокрутка вниз к новому элементу
       item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
   });
