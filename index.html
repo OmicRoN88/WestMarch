@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Шестиугольные кнопки</title>
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #14141f;
+    font-family: Arial, sans-serif;
+    color: #fff;
+  }
+
+  /* Контейнер-соты */
+  .hive {
+    position: relative;
+    /* Размеры подобраны так, чтобы шестиугольники примыкали друг к другу */
+    width: 360px;
+    height: 400px;
+  }
+
+  /* Общий стиль шестиугольной кнопки */
+  .hex {
+    position: absolute;
+    width: 110px;
+    height: 127px;              /* высота = ширина * 1.1547 для правильного шестиугольника */
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background: #3d3d5c;
+    transition: background .2s, transform .1s;
+    padding: 0;
+  }
+
+  .hex:hover { background: #50507a; }
+  .hex:active { transform: scale(0.97); }
+
+  /* Центральный шестиугольник */
+  .hex-center {
+    left: 125px;                /* (360 - 110) / 2 = 125 */
+    top: 136px;                 /* (400 - 127) / 2 ≈ 136 */
+    background: #ff9500;
+    z-index: 2;
+  }
+  .hex-center:hover { background: #ffb143; }
+
+  /* Смещения для 6 соседей.
+     По горизонтали шаг = 110px (ширина),
+     по вертикали шаг = 95.25px (0.75 * высота). */
+  .hex-top        { left: 125px; top: 0px;    }
+  .hex-top-right  { left: 180px; top: 68px;   }
+  .hex-bottom-right { left: 180px; top: 204px; }
+  .hex-bottom     { left: 125px; top: 272px;  }
+  .hex-bottom-left{ left: 70px;  top: 204px;  }
+  .hex-top-left   { left: 70px;  top: 68px;   }
+
+  /* Цвета соседей (можно поменять) */
+  .hex-top, .hex-bottom { background: #2e7d32; }
+  .hex-top:hover, .hex-bottom:hover { background: #3aa040; }
+
+  .hex-top-right, .hex-bottom-left { background: #1565c0; }
+  .hex-top-right:hover, .hex-bottom-left:hover { background: #1e88e5; }
+
+  .hex-bottom-right, .hex-top-left { background: #8e24aa; }
+  .hex-bottom-right:hover, .hex-top-left:hover { background: #ab47bc; }
+</style>
+</head>
+<body>
+
+  <div class="hive">
+    <!-- Центр -->
+    <button class="hex hex-center" onclick="alert('Центр')">Центр</button>
+
+    <!-- 6 соседей по граням -->
+    <button class="hex hex-top"          onclick="alert('Верх')">Верх</button>
+    <button class="hex hex-top-right"    onclick="alert('Верх-право')">В-П</button>
+    <button class="hex hex-bottom-right" onclick="alert('Низ-право')">Н-П</button>
+    <button class="hex hex-bottom"       onclick="alert('Низ')">Низ</button>
+    <button class="hex hex-bottom-left"  onclick="alert('Низ-лево')">Н-Л</button>
+    <button class="hex hex-top-left"     onclick="alert('Верх-лево')">В-Л</button>
+  </div>
+
+</body>
+</html>
