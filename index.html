@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Шестиугольные кнопки</title>
+<title>Шестиугольные кнопки — соты</title>
 <style>
   * { box-sizing: border-box; }
 
@@ -11,87 +11,197 @@
     margin: 0;
     min-height: 100vh;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
+    padding: 30px 16px;
     background: #14141f;
     font-family: Arial, sans-serif;
     color: #fff;
   }
 
-  /* Контейнер-соты */
+  h1 { font-size: 1.2rem; font-weight: 500; opacity: .8; margin: 0 0 24px; }
+
+  /* ---------- СОТА ---------- */
   .hive {
     position: relative;
-    /* Размеры подобраны так, чтобы шестиугольники примыкали друг к другу */
-    width: 360px;
-    height: 400px;
+    /* Размеры: W — ширина шестиугольника, H — высота (H = W * 1.1547 для правильного) */
+    --w: 120px;
+    --h: 138.56px; /* 120 * 1.1547 */
+    width: calc(var(--w) * 2);
+    height: calc(var(--h) * 2);
   }
 
-  /* Общий стиль шестиугольной кнопки */
+  /* Базовый шестиугольник (pointy-top) */
   .hex {
     position: absolute;
-    width: 110px;
-    height: 127px;              /* высота = ширина * 1.1547 для правильного шестиугольника */
+    width: var(--w);
+    height: var(--h);
+    /* Форма шестиугольника с вершиной вверх */
     clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+
+    /* Внутренняя заливка (чуть темнее) + толстая граница имитируется через box-shadow внутри clip-path */
+    background: #2b2b40;
     border: none;
     cursor: pointer;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
-    font-weight: bold;
-    color: #fff;
-    background: #3d3d5c;
-    transition: background .2s, transform .1s;
-    padding: 0;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: #e8e8f5;
+    transition: background .15s, transform .08s;
+    /* Толстая «граница»: рисуем внешний слой через drop-shadow-фильтр не получится внутри clip-path,
+       поэтому используем вложенный псевдоэлемент ниже. */
+    overflow: hidden;
   }
 
-  .hex:hover { background: #50507a; }
+  /* Внутренний слой — создаёт эффект толстой границы и объёма */
+  .hex::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    /* Внешний цвет границы */
+    background: #6a6a8a;
+    clip-path: inherit;
+    z-index: 0;
+  }
+
+  /* Внутренняя заливка (темнее) — чуть меньше по размеру, чтобы был виден «бортик» */
+  .hex::after {
+    content: "";
+    position: absolute;
+    inset: 6px; /* толщина границы */
+    background: #24243a;
+    clip-path: inherit;
+    z-index: 1;
+  }
+
+  /* Текст поверх слоёв */
+  .hex > span {
+    position: relative;
+    z-index: 2;
+    padding: 0 6px;
+    pointer-events: none;
+  }
+
+  .hex:hover::after { background: #2f2f4d; }
   .hex:active { transform: scale(0.97); }
 
-  /* Центральный шестиугольник */
+  /* ---------- ПОЗИЦИИ ---------- */
+  /* Центр */
   .hex-center {
-    left: 125px;                /* (360 - 110) / 2 = 125 */
-    top: 136px;                 /* (400 - 127) / 2 ≈ 136 */
-    background: #ff9500;
-    z-index: 2;
+    left: calc(var(--w) / 2);
+    top: calc(var(--h) / 2);
+    z-index: 3;
   }
-  .hex-center:hover { background: #ffb143; }
+  /* Центр делаем чуть выделенным по цвету границы */
+  .hex-center::before { background: #8a8ab0; }
 
-  /* Смещения для 6 соседей.
-     По горизонтали шаг = 110px (ширина),
-     по вертикали шаг = 95.25px (0.75 * высота). */
-  .hex-top        { left: 125px; top: 0px;    }
-  .hex-top-right  { left: 180px; top: 68px;   }
-  .hex-bottom-right { left: 180px; top: 204px; }
-  .hex-bottom     { left: 125px; top: 272px;  }
-  .hex-bottom-left{ left: 70px;  top: 204px;  }
-  .hex-top-left   { left: 70px;  top: 68px;   }
+  /* Соседи: смещения по геометрии правильного шестиугольника.
+     По вертикали шаг = 0.75 * H, по горизонтали = 0.5 * W. */
+  .hex-north {
+    left: calc(var(--w) / 2);
+    top: calc(var(--h) / 2 - var(--h) * 0.75);
+  }
+  .hex-south {
+    left: calc(var(--w) / 2);
+    top: calc(var(--h) / 2 + var(--h) * 0.75);
+  }
+  .hex-north-east {
+    left: calc(var(--w) / 2 + var(--w) * 0.5);
+    top: calc(var(--h) / 2 - var(--h) * 0.375);
+  }
+  .hex-north-west {
+    left: calc(var(--w) / 2 - var(--w) * 0.5);
+    top: calc(var(--h) / 2 - var(--h) * 0.375);
+  }
+  .hex-south-east {
+    left: calc(var(--w) / 2 + var(--w) * 0.5);
+    top: calc(var(--h) / 2 + var(--h) * 0.375);
+  }
+  .hex-south-west {
+    left: calc(var(--w) / 2 - var(--w) * 0.5);
+    top: calc(var(--h) / 2 + var(--h) * 0.375);
+  }
 
-  /* Цвета соседей (можно поменять) */
-  .hex-top, .hex-bottom { background: #2e7d32; }
-  .hex-top:hover, .hex-bottom:hover { background: #3aa040; }
-
-  .hex-top-right, .hex-bottom-left { background: #1565c0; }
-  .hex-top-right:hover, .hex-bottom-left:hover { background: #1e88e5; }
-
-  .hex-bottom-right, .hex-top-left { background: #8e24aa; }
-  .hex-bottom-right:hover, .hex-top-left:hover { background: #ab47bc; }
+  /* ---------- ИСТОРИЯ ---------- */
+  .history {
+    margin-top: 32px;
+    width: min(520px, 92vw);
+    background: #1b1b2b;
+    border: 1px solid #33334d;
+    border-radius: 12px;
+    padding: 14px 16px;
+    min-height: 60px;
+  }
+  .history h2 {
+    margin: 0 0 8px;
+    font-size: .85rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: #9a9ac0;
+  }
+  .history-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .history-item {
+    background: #2b2b40;
+    border: 1px solid #44446a;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: .85rem;
+    color: #e8e8f5;
+    animation: pop .15s ease-out;
+  }
+  @keyframes pop {
+    from { transform: scale(.7); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
 </style>
 </head>
 <body>
 
-  <div class="hive">
+  <h1>Выберите направление</h1>
+
+  <div class="hive" id="hive">
     <!-- Центр -->
-    <button class="hex hex-center" onclick="alert('Центр')">Центр</button>
+    <button class="hex hex-center" data-label="Центр"><span>Центр</span></button>
 
     <!-- 6 соседей по граням -->
-    <button class="hex hex-top"          onclick="alert('Верх')">Верх</button>
-    <button class="hex hex-top-right"    onclick="alert('Верх-право')">В-П</button>
-    <button class="hex hex-bottom-right" onclick="alert('Низ-право')">Н-П</button>
-    <button class="hex hex-bottom"       onclick="alert('Низ')">Низ</button>
-    <button class="hex hex-bottom-left"  onclick="alert('Низ-лево')">Н-Л</button>
-    <button class="hex hex-top-left"     onclick="alert('Верх-лево')">В-Л</button>
+    <button class="hex hex-north"      data-label="Север"><span>Север</span></button>
+    <button class="hex hex-north-east" data-label="Северо-восток"><span>Северо-восток</span></button>
+    <button class="hex hex-south-east" data-label="Юго-восток"><span>Юго-восток</span></button>
+    <button class="hex hex-south"      data-label="Юг"><span>Юг</span></button>
+    <button class="hex hex-south-west" data-label="Юго-запад"><span>Юго-запад</span></button>
+    <button class="hex hex-north-west" data-label="Северо-запад"><span>Северо-запад</span></button>
   </div>
+
+  <div class="history">
+    <h2>История нажатий</h2>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+<script>
+  const list = document.getElementById('historyList');
+  document.querySelectorAll('.hex').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const label = btn.dataset.label || btn.textContent.trim();
+      const item = document.createElement('span');
+      item.className = 'history-item';
+      item.textContent = label;
+      list.appendChild(item);
+      // Прокрутка к последнему элементу
+      item.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'end' });
+    });
+  });
+</script>
 
 </body>
 </html>
